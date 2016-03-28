@@ -1,6 +1,6 @@
 #!perl -w
 use strict;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Promises backend => ['AnyEvent'], 'deferred', 'collect';
 use Promises::RateLimiter;
 use Data::Dumper;
