@@ -1,0 +1,14 @@
+Makefile
+Makefile.old
+*.tar.gz
+*.bak
+pm_to_blib
+blib/
+/Promises-RateLimiter-*
+/Promises-RateLimiter-*/
+.releaserc
+cover_db
+MYMETA.*
+cpan/
+jar/
+t/documents/*.mp3
