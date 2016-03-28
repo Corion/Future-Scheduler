@@ -4,6 +4,15 @@ use Moo;
 use Algorithm::TokenBucket;
 use AnyEvent;
 
+use vars qw($VERSION);
+$VERSION = '0.01';
+
+=head1 NAME
+
+Promises::RateLimiter - rate limit paths through promises
+
+=cut
+
 has token_bucket => (
     is => 'lazy',
     default => sub { Algorithm::TokenBucket->new( $_[0]->rate, $_[0]->burst ) },
