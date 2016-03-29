@@ -11,6 +11,74 @@ $VERSION = '0.01';
 
 Promises::RateLimiter - rate limit paths through promises
 
+=head1 SYNOPSIS
+
+This is the synopsis of L<Promises>, but with added limiting
+of the number of simulatneous HTTP requests and the rate at which
+requests are made to the server.
+
+    use AnyEvent::HTTP;
+    use JSON::XS qw[ decode_json ];
+    use Promises qw[ collect deferred ];
+    use Promises::RateLimiter;
+
+    my $concurrent_http_requests = Promises::RateLimiter->new(
+        maximum => 4,
+        rate => 30/60, # 30 requests/minute
+    );
+
+    sub fetch_it {
+          my ($uri) = @_;
+          my $d = deferred;
+          http_get $uri => sub {
+              my ($body, $headers) = @_;
+              $headers->{Status} == 200
+                  ? $d->resolve( $uri, $body )
+                  : $d->reject( $body )
+          };
+          $d->promise;
+    }
+
+
+    my @urls = (@ARGV);
+    while(@urls) {
+
+      my $cv = AnyEvent->condvar;
+      
+      my @limited_urls = map {
+          map {
+              # Wrap each URL in a Promise
+              my $p = deferred;
+              $p->resolve( $uri );
+              $p->promise
+              ->limit( $concurrent_http_requests )
+          }
+      } splice @urls;
+
+      my @fetch = map {
+          $_->limit( $concurrent_http_requests )
+          ->then( sub { 
+              my( $url ) = @_;
+              fetch_it($_)
+          })
+          ->then( sub {
+              my($url, $html) = @_;
+              
+              my @newly_found = extract_urls($html);
+              
+              push @urls, @newly_found;
+              
+              return $url, $html;
+          })
+      } @now_fetching;
+
+      # Wait until all requests have either died or returned.
+      my $done = collect( @fetch );
+      
+      my @retrieved = await( $done );
+      ...
+    }
+
 =cut
 
 has token_bucket => (
@@ -80,12 +148,39 @@ sub limit {
     })
 }
 
+=head1 DRAWBACKS
+
+Currently, the limiter sends the promise to sleep until at least one
+promise can continue. This produces a thundering herd effect as all
+outstanding promises will wake up and retry at the same time but only
+one will likely succeed. See
+L<Promises::RateLimiter::Backoff> for a way to mitigate that.
+
+Maybe Promises::RateLimiter::Backoff should become the default
+strategy to prevent thundering herds.
+
+=cut
+
 package Promises::RateLimiter::Backoff;
 use strict;
 use Moo;
 use Algorithm::TokenBucket;
 use AnyEvent;
 extends 'Promises::RateLimiter';
+
+=head1 NAME
+
+Promises::RateLimiter::Backoff - rate limit with larger retry spread
+
+=head1 Strategy
+
+This limiter counts how many attempts were already limited and schedules
+the current promise to retry linearly after all previous promises will
+have retried.
+
+No exponential backoff is tried.
+
+=cut
 
 has backoff => (
     is => 'ro',
@@ -111,7 +206,7 @@ sub retry {
         });
     } else {
         #warn "Using token";
-        $self->blocked( 0 );
+        $self->blocked( $self->blocked( -1 ));
         $self->token_bucket->count(1);
         #warn "Resolving to @$args";
         $p->resolve(@$args);
