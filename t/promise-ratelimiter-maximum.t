@@ -5,10 +5,12 @@ use Promises backend => ['AnyEvent'], 'deferred', 'collect';
 use Promises::RateLimiter;
 use Data::Dumper;
 
+my $maximum = 3;
+
 my $limiter = Promises::RateLimiter->new(
     burst => 5,
-    rate  => 20/60, # 3/s
-    maximum => 2,
+    rate  => 180/60, # 3/s
+    maximum => $maximum,
 );
 
 sub await($) {
@@ -40,9 +42,16 @@ sub delayed_result {
     $done->promise
 }
 
+sub as_promise {
+    my @res = @_;
+    my $done = deferred;
+    $done->resolve( @res );
+    $done->promise
+}
+
 my @elements = await collect( map {
     my $i = $_;
-    my $p = delayed_result( $i );
+    my $p = as_promise( $i );
     $p->limit($limiter)
       ->then(sub{
           my($i) = @_;
@@ -61,5 +70,5 @@ my @elements = await collect( map {
 @elements = sort { $a<=>$b } map { @$_ } @elements;
 is_deeply( \@elements, [1..10], "We get the expected results")
     or diag Dumper \@elements;
-cmp_ok $active_max, '<=', 2,
-    "No more than 2 jobs active at the same time"; 
+cmp_ok $active_max, '<=', $maximum,
+    "No more than $maximum jobs active at the same time"; 
