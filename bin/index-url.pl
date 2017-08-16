@@ -23,8 +23,8 @@ use POSIX 'strftime';
 use Dancer::SearchApp::IndexSchema qw(create_mapping find_or_create_index %indices %analyzers );
 use Dancer::SearchApp::Utils qw(synchronous);
 
-#use lib 'C:/Users/Corion/Projekte/Apache-Tika/lib';
-use CORION::Apache::Tika::Server;
+use lib 'C:/Users/Corion/Projekte/Apache-Tika/lib';
+use Apache::Tika::Server;
 
 use JSON::MaybeXS;
 my $true = JSON->true;
@@ -65,7 +65,7 @@ my $tika_path = (sort { my $ad; $a =~ /server-1.(\d+)/ and $ad=$1;
               } glob $tika_glob)[0];
 die "Tika not found in '$tika_glob'" unless -f $tika_path; 
 #warn "Using '$tika_path'";
-my $tika= CORION::Apache::Tika::Server->new(
+my $tika= Apache::Tika::Server->new(
     jarfile => $tika_path,
 );
 $tika->launch;
@@ -74,10 +74,10 @@ my $ok = AnyEvent->condvar;
 my $info = synchronous $e->cat->plugins;
 
 # Koennen wir ElasticSearch langdetect als Fallback nehmen?
-my $have_langdetect = $info =~ /langdetect/i;
-if( ! $have_langdetect ) {
-    warn "Language detection disabled";
-};
+my $have_langdetect = 0; #$info =~ /langdetect/i;
+#if( ! $have_langdetect ) {
+#    warn "Language detection disabled";
+#};
 
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html
 
