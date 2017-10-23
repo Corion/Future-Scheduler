@@ -3,6 +3,11 @@ use strict;
 use Moo 2;
 with 'Role::RateLimiter';
 
+has waiting => (
+    is => 'lazy',
+    default => sub {[]},
+);
+
 use Scalar::Util 'weaken';
 
 use Filter::signatures;
@@ -47,11 +52,18 @@ Using L<Async::Await> style
       ...
   }
 
+=head1 IMPLEMENTING SLEEP
+
+ delay_class => 'AnyEvent::Future'
+ delay_deferred => sub {...}
+
+
+  
 =head1 PATTERNS
 
 =head2 Waiting some time to rate limit
 
-  my $Limiter = Algorithm::TokenBucket->new( 10, 3 );
+  my $limiter = Algorithm::TokenBucket->new( 10, 3 );
 
   ...
   while( my $sleep = $limiter->take( 1 )) {
@@ -71,51 +83,39 @@ becomes
 
   my $single = Future::RateLimiter->new( maximum => 1 );
 
-
   sub save_file {
-      my $token = await $single->limit();
+      (my $token) = await $single->limit();
       ...
       undef $token; # Allow access to others again
   }
 
+=head2 Serializing access with a user-defined string token
+  
+  $l->limit([@_], token => 'foo');
+  ...
+  $l->release(token => 'foo'); # Allow access to others again
+  
+=head1 METHODS
+
+=head2 C<< ->limit( $args, %options )
+
+  $l->limit([@_])->then( sub {
+      my($token, @args) = @_;
+      ...
+  });
+
+Apply a limit for a resource
+
+  $l->limit([@_], key => $url->host)->then( sub {
+      my($token, @args) = @_;
+      ...
+  });
+
 =cut
 
-sub limit( $self, $args=[], $sleeper=$self->future ) {
-    if(!$self->token_bucket->conform(1) or $self->active_count >= $self->maximum) {
-        my $until = $self->token_bucket->until(1);
-        if( ! $until ) {
-            warn sprintf "Maximum concurrency hit (%d)", $self->maximum;
-            $until = 1;
-        };
-        #warn "@$args Waiting $until seconds";
-        my $timer; $timer = $self->sleep( $until )->on_ready( sub{
-            undef $timer;
-            warn "@$args Timer expired";
-
-            # Meh, how to reschedule here?
-            # Refactor this block out into its own subroutine?
-            $self->limit($args,$sleeper);
-        });
-
-    } else {
-        $self->token_bucket->count(1);
-
-        # Keep time how long the average item takes
-        # and use that as the average wait time above
-        my $start_time = time;
-        # Meh - here we need the next future...
-        $self->active_count( $self->active_count +1 );
-        my $s = $self;
-        weaken $s;
-        my $token_released = guard {
-            my $c = $s->active_count -1;
-            warn "Reducing active count to $c";
-            $s->active_count( $c );
-        };
-        warn "@$args resolving";
-        $sleeper->done( $token_released );
-    }
-    return $sleeper
+sub limit( $self, $args=[], %options ) {
+    my $bucket = $self->bucket( $options{ key });
+    $bucket->enqueue( $args );
 }
 
 # Role Sleeper::AnyEvent
