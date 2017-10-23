@@ -7,11 +7,6 @@ use AnyEvent;
 use vars qw($VERSION);
 $VERSION = '0.01';
 
-Future::RateLimiter
-
- delay_class => 'AnyEvent::Future'
- delay_deferred => sub {...}
-
 =head1 NAME
 
 Promises::RateLimiter - rate limit paths through promises
