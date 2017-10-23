@@ -40,7 +40,8 @@ WriteMakefile1(
         'Moo' => 0,
         'Promises' => 0,
         'Algorithm::TokenBucket' => 0,
-        'AnyEvent' => 0, # for the timer...
+        'AnyEvent::Future' => 0, # for the timer...
+        'Scalar::Util' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Promises-RateLimiter-*' },
