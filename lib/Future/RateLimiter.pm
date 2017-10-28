@@ -21,6 +21,9 @@ Future::RateLimiter - rate-limits your futures
 
 =head1 SYNOPSIS
 
+Actually, this is more about resource control in general than just
+rate limiting.
+
   my $l = Future::RateLimiter->new(
       ...
   );
