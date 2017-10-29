@@ -1,6 +1,5 @@
 package RateLimiter::Bucket;
 use strict;
-#use Moo::Role;
 use Moo;
 use Filter::signatures;
 use feature 'signatures';
