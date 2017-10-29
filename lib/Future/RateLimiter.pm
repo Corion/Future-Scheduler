@@ -60,8 +60,6 @@ Using L<Async::Await> style
  delay_class => 'AnyEvent::Future'
  delay_deferred => sub {...}
 
-
-  
 =head1 PATTERNS
 
 =head2 Waiting some time to rate limit
