@@ -55,8 +55,11 @@ Using L<Async::Await> style
 
   ...
   while( my $sleep = $limiter->take( 1 )) {
+      ... do work ...
+  } else {
+      my $sleep = $limiter->until(1);
       sleep $sleep;
-  };
+  }
   ...
 
 becomes
