@@ -191,6 +191,7 @@ sub retry {
 }
 
 package Promises::Deferred;
+use strict;
 # Yay monkey patch
 
 sub limit {
