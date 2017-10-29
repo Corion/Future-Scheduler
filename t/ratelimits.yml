@@ -1,0 +1,13 @@
+request:
+    - rate:
+      burst : 3
+      limit : 60/60
+    - parallel: 1
+      limit: 4
+    - rate: 1
+      burst: 1
+      limit: 60/120
+namelookup:
+    - rate:
+      burst: 3
+      limit: 60/60
