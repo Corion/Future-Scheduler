@@ -1,12 +1,12 @@
 package Role::RateLimiter;
 use strict;
 use Moo::Role;
-use Algorithm::TokenBucket;
+use Filter::signatures;
+use feature 'signatures';
+no warnings 'experimental::signatures';
+use RateLimiter::Bucket;
 
-has token_bucket => (
-    is => 'lazy',
-    default => sub { Algorithm::TokenBucket->new( $_[0]->rate, $_[0]->burst ) },
-);
+# Container for the defaults
 
 has burst => (
     is => 'ro',
@@ -27,5 +27,22 @@ has active_count => (
     is => 'rw',
     default => 0,
 );
+
+has 'buckets' => (
+    is => 'lazy',
+    default => sub { {} },
+);
+
+sub _make_bucket( $self, %options ) {
+    $options{ rate } ||= $self->rate;
+    $options{ maximum } ||= $self->maximum;
+    $options{ burst } ||= $self->burst;
+    RateLimiter::Bucket->new( \%options )
+}
+
+sub _bucket( $self, $key ) {
+    $key = '' unless defined $key;
+    $self->buckets->{ $key } ||= $self->_make_bucket;
+}
 
 1;

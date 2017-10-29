@@ -10,17 +10,20 @@ use ExtUtils::MakeMaker qw(WriteMakefile);
 my $eumm_version = $ExtUtils::MakeMaker::VERSION;
 $eumm_version =~ s/_//;
 
+my $module = 'Promises::RateLimiter';
+(my $main_file = "lib/$module.pm" ) =~ s!::!/!g;
+
 # I should maybe use something like Shipwright...
-regen_README('lib/Promises/RateLimiter.pm');
+regen_README($main_file);
 #regen_EXAMPLES();
 
 my @tests = map { glob $_ } 't/*.t', 't/*/*.t';
 
 WriteMakefile1(
-    NAME                => 'Promises::RateLimiter',
+    NAME                => $module,
     AUTHOR              => q{Max Maischein <corion@cpan.org>},
-    VERSION_FROM        => 'lib/Promises/RateLimiter.pm',
-    ABSTRACT_FROM       => 'lib/Promises/RateLimiter.pm',
+    VERSION_FROM        => $main_file,
+    ABSTRACT_FROM       => $main_file,
     META_MERGE => {
         resources => {
             repository => 'https://github.com/Corion/promises-ratelimiter',
@@ -37,7 +40,8 @@ WriteMakefile1(
         'Moo' => 0,
         'Promises' => 0,
         'Algorithm::TokenBucket' => 0,
-        'AnyEvent' => 0, # for the timer...
+        'AnyEvent::Future' => 0, # for the timer...
+        'Scalar::Util' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Promises-RateLimiter-*' },
