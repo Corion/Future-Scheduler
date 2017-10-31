@@ -1,6 +1,9 @@
 LinkChecker:
 #!perl -w
 use strict;
+use Filter::signatures;
+no warnings 'experimental::signatures';
+use feature 'signatures';
 use Getopt::Long;
 use Pod::Usage;
 use Future::HTTP;
@@ -26,7 +29,11 @@ my %status; # maybe tie it to disk for persistence
 # exists and true: status
 
 my @queue;
-push @queue, URI->new($start_url);
+
+for my $start_url ( @ARGV ) {
+    push @queue, URI->new($start_url);
+};
+my %requested;
 my %outstanding;
 
 # Should we turn all of this into one Future?!
@@ -36,11 +43,12 @@ while( my $url = shift @queue or keys %outstanding) {
         $outstanding{ $url } = $total->limit([$url])->then( sub( $token, $url ) {
             $token, fetch_url( $url )
         })->then(sub( $token, $body, $headers ) {
-            $per_host->limit( key => $url->host )->then( sub {
+            $per_host->limit( [$body, $headers], key => $url->host )
+        })->then( sub( $body, $headers ) {
             delete $outstanding{ $url };
             $status{ $url } = $headers->{Status};
             push @queue, grep { !$requested{$_}++ } get_links( $body );
-        })};
+        });
     } elsif( !@queue ) {
         # Spin, waiting for something to happen
         Future->wait_any( values %outstanding )->get;
