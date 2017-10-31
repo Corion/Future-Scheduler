@@ -87,12 +87,12 @@ sub remove_active( $self ) {
     };
 }
 
-sub schedule( $self, $f, $args=[], $seconds = 0 ) {
+sub schedule( $self, $f, $args, $token, $seconds = 0 ) {
     # This is backend-specific and should put a timeout
     # after 0 ms into the queue or however the IO loop schedules
     # an immediate callback from the IO loop
     my $n;
-    $n = $self->sleep($seconds)->then(sub { undef $n; $f->done( @$args ) });
+    $n = $self->sleep($seconds)->then(sub { undef $n; $f->done( $token, @$args ) });
     $n
 }
 
@@ -131,11 +131,11 @@ future holds.
 
 =cut
 
-sub limit( $self, $key=undef ) {
+sub limit( $self, $args=[], %options ) {
     my $token = undef;
     my $res = $self->future;
     #warn "Storing $res";
-    push @{ $self->queue }, [ $res, $token ];
+    push @{ $self->queue }, [ $res, $args, $token ];
     $self->schedule_queued;
     $res;
 }
@@ -154,9 +154,9 @@ sub schedule_queued( $self ) {
     my $queue = $self->queue;
     while( @$queue and $bucket->conform(1)) {
         #warn "Dispatching";
-        my( $f, $args ) = @{ shift @$queue };
+        my( $f, $args, $token ) = @{ shift @$queue };
         $bucket->count(1);
-        $self->schedule( $f, $args );
+        $self->schedule( $f, $args, $token );
     };
     if( 0+@$queue ) {
         # We have some more to launch but reached our rate limit

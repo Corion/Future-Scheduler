@@ -1,6 +1,9 @@
 #!perl -w
 use strict;
 use Test::More tests => 1;
+use Filter::signatures;
+no warnings 'experimental::signatures';
+use feature 'signatures';
 use Future;
 use AnyEvent::Future;
 #use Future::RateLimiter;
@@ -15,10 +18,10 @@ my $limiter = RateLimiter::Bucket->new(
 my $started = time;
 my @elements = Future->wait_all( map {
     my $i = $_;
-    $limiter->limit()
-    ->then(sub {
-          diag "$i done\n";
-          return Future->done($i);
+    $limiter->limit(['foo',$i])
+    ->then(sub($token,$name,$j) {
+          diag "$j done\n";
+          return Future->done($j);
     });
 } 1..10)->get;
 #@elements = sort { $a<=>$b } map { $_->get } @elements;
