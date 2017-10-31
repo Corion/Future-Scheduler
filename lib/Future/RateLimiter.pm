@@ -133,3 +133,26 @@ sub future( $self ) {
 }
 
 1;
+
+=head1 SEE ALSO
+
+More limiters, collected by Thomas Fahle
+
+L<Algorithm::TokenBucket> - Token bucket rate limiting algorithm
+
+
+L<Algorithm::FloodControl> - Limit event processing to count/time ratio.
+
+L<https://www.perl.com/pub/2004/11/11/floodcontrol.html>
+
+
+L<Object::RateLimiter> - A flood control (rate limiter) object
+
+L<Algorithm::LeakyBucket> - Perl implementation of leaky bucket rate limiting
+
+L<Sub::Throttler> - Rate limit sync and async function calls
+
+L<Data::Throttler> - Limit data throughput
+
+
+=cut
