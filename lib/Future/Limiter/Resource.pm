@@ -37,7 +37,6 @@ sub get_release_token( $self ) {
         $self->remove_active();
         # scan the queue and execute the next future
         if( my $next = shift @{ $self->queue }) {
-            #my( $future, $args ) = @$next;
             $self->add_active()->then(sub( $token ) {
                 $next->done( $token );
             })->get;
