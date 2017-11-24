@@ -37,12 +37,8 @@ sub get_release_token( $self ) {
         #warn "Reducing active count to $c";
         $self->remove_active();
         # scan the queue and execute the next future
-        if( my $next = shift @{ $self->queue }) {
-            $self->add_active()->then(sub( $token ) {
-                $next->done( $token );
-            })->get;
-            # XXX Why do we want the ->get here?! How else can we
-            # prevent losing our ->add_active future?
+        if( @{ $self->queue }) {
+            $self->schedule_queued;
         };
     };
 }
@@ -52,6 +48,7 @@ sub add_active( $self ) {
         $self->active_count( $self->active_count+1 );
         return $self->future->done($self->get_release_token);
     } else {
+        # ?! How will this ever kick off?!
         return $self->future->new();
     }
 }
@@ -126,32 +123,20 @@ Processes all futures that can be started while obeying the current rate limits
 sub schedule_queued( $self ) {
     my $queue = $self->queue;
     while( @$queue and $self->active_count < $self->maximum ) {
-        #warn "Dispatching";
+        #warn sprintf "Dispatching (act/max %d/%d)", $self->active_count, $self->maximum;
         my( $f, $args ) = @{ shift @$queue };
-        $self->schedule( $f, $args );
+        # But ->schedule doesn't increase ->active_count, does it?!
+        my $n;
+        $n = $self->add_active;
+        use Data::Dumper;
+        my $res; $res = $n->then(sub( $token, @args ) {
+            undef $res;
+            $f->done( $token, @$args )
+        });
     };
     if( 0+@$queue ) {
-        # We have some more to launch but reached our rate limit
-        # so we now schedule a callback to ourselves (if we haven't already)
-        if( ! $self->next_token_available ) {
-            my $earliest_time = $bucket->until(1);
-            my $s = $self;
-            weaken $s;
-            #warn "Setting up cb after $earliest_time";
-            my $wakeup;
-            $wakeup = $self->sleep($earliest_time)->then(sub{
-                $wakeup->set_label('wakeup call');
-                # Remove this callback:
-                $self->next_token_available(undef);
-                $s->schedule_queued();
-                Future->done()
-            })->catch( sub {
-                use Data::Dumper;
-                warn "Caught error: $@";
-                warn Dumper \@_;
-            });
-            $self->next_token_available($wakeup);
-        };
+        # We have some more to launch but reached our concurrency limit
+        # the active futures will call us again in their ->on_done()
     };
 }
 
