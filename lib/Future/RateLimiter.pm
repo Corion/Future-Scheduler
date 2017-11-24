@@ -13,7 +13,6 @@ use Scalar::Util 'weaken';
 use Filter::signatures;
 use feature 'signatures';
 no warnings 'experimental::signatures';
-use Guard 'guard';
 
 =head1 NAME
 
@@ -118,13 +117,13 @@ Apply a limit for a resource
 =cut
 
 sub limit( $self, $args=[], %options ) {
-    my $bucket = $self->bucket( $options{ key });
-    $bucket->enqueue( $args );
+    my $bucket = $self->_bucket( $options{ key });
+    $bucket->limit( $args );
 }
 
 # Role Sleeper::AnyEvent
 sub sleep( $self, $s = 1 ) {
-    AnyEvent::Future->new_timeout(after => $s)->on_ready(sub {
+    AnyEvent::Future->new_delay(after => $s)->on_ready(sub {
         warn "Timer expired";
     });
 }
