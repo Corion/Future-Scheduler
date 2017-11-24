@@ -6,6 +6,7 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 use AnyEvent::Future; # later we'll go independent
 use Scalar::Util qw(weaken);
+use Guard 'guard';
 
 has maximum => (
     is => 'rw',
