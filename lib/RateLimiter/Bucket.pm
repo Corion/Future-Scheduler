@@ -151,17 +151,12 @@ Processes all futures that can be started while obeying the current rate limits
 sub schedule_queued( $self ) {
     my $bucket = $self->bucket;
     my $queue = $self->queue;
-    my $can_process = 0;
-    while( $can_process < @$queue and $bucket->conform($can_process)) {
-        $can_process++;
-    };
-    for( 1..$can_process ) {
-        warn "Dispatching";
+    while( @$queue and $bucket->conform(1)) {
         my( $f, $args ) = @{ shift @$queue };
         $bucket->count(1);
         $self->schedule( $f, $args );
     };
-    if( my $items = 0+@$queue ) {
+    if( 0+@$queue ) {
         # We have some more to launch but reached our rate limit
         # so we now schedule a callback to ourselves (if we haven't already)
         if( ! $self->next_token_available ) {
