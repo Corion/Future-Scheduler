@@ -41,6 +41,7 @@ WriteMakefile1(
         'Promises' => 0,
         'Algorithm::TokenBucket' => 0,
         'AnyEvent::Future' => 0, # for the timer...
+        'Guard' => 0,
         'Scalar::Util' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

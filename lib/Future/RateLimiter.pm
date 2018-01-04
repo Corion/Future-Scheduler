@@ -13,7 +13,6 @@ use Scalar::Util 'weaken';
 use Filter::signatures;
 use feature 'signatures';
 no warnings 'experimental::signatures';
-use Guard 'guard';
 
 =head1 NAME
 
@@ -60,8 +59,6 @@ Using L<Async::Await> style
  delay_class => 'AnyEvent::Future'
  delay_deferred => sub {...}
 
-
-  
 =head1 PATTERNS
 
 =head2 Waiting some time to rate limit
@@ -70,8 +67,11 @@ Using L<Async::Await> style
 
   ...
   while( my $sleep = $limiter->take( 1 )) {
+      ... do work ...
+  } else {
+      my $sleep = $limiter->until(1);
       sleep $sleep;
-  };
+  }
   ...
 
 becomes
@@ -117,13 +117,13 @@ Apply a limit for a resource
 =cut
 
 sub limit( $self, $args=[], %options ) {
-    my $bucket = $self->bucket( $options{ key });
-    $bucket->enqueue( $args );
+    my $bucket = $self->_bucket( $options{ key });
+    $bucket->limit( $args );
 }
 
 # Role Sleeper::AnyEvent
 sub sleep( $self, $s = 1 ) {
-    AnyEvent::Future->new_timeout(after => $s)->on_ready(sub {
+    AnyEvent::Future->new_delay(after => $s)->on_ready(sub {
         warn "Timer expired";
     });
 }
