@@ -140,11 +140,9 @@ More limiters, collected by Thomas Fahle
 
 L<Algorithm::TokenBucket> - Token bucket rate limiting algorithm
 
-
 L<Algorithm::FloodControl> - Limit event processing to count/time ratio.
 
 L<https://www.perl.com/pub/2004/11/11/floodcontrol.html>
-
 
 L<Object::RateLimiter> - A flood control (rate limiter) object
 

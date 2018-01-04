@@ -115,8 +115,7 @@ sub limit( $self, $key=undef ) {
 
   $bucket->schedule_queued
 
-Processes all futures that can be started while obeying the current rate limits
-(including burst).
+Processes all futures that can be started while obeying the current rate limits.
   
 =cut
 
@@ -128,7 +127,6 @@ sub schedule_queued( $self ) {
         # But ->schedule doesn't increase ->active_count, does it?!
         my $n;
         $n = $self->add_active;
-        use Data::Dumper;
         my $res; $res = $n->then(sub( $token, @args ) {
             undef $res;
             $f->done( $token, @$args )
