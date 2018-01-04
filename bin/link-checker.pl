@@ -40,14 +40,23 @@ my %outstanding;
 while( my $url = shift @queue or keys %outstanding) {
     if( $url ) {
         # Do rate-limiting here
-        $outstanding{ $url } = $total->limit([$url])->then( sub( $token, $url ) {
-            $token, fetch_url( $url )
-        })->then(sub( $token, $body, $headers ) {
-            $per_host->limit( [$body, $headers], key => $url->host )
-        })->then( sub( $body, $headers ) {
+        my $host_token;
+        my $total_token;
+        $outstanding{ $url } = $total->limit()->then( sub( $t ) {
+            $total_token = $t;
+            fetch_url( $url )
+        })->then(sub( $body, $headers ) {
+            my $h = $url->host;
+            $per_host->limit( $h, $body, $headers)
+        })->then( sub( $t, $body, $headers ) {
+            $host_token = $t;
             delete $outstanding{ $url };
             $status{ $url } = $headers->{Status};
             push @queue, grep { !$requested{$_}++ } get_links( $body );
+        })->on_ready(sub {
+            # Clean up our tokens
+            undef $host_token;
+            undef $total_token;
         });
     } elsif( !@queue ) {
         # Spin, waiting for something to happen
