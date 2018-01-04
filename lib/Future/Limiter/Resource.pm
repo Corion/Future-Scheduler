@@ -103,10 +103,10 @@ future holds.
 
 =cut
 
-sub limit( $self, $key=undef ) {
+sub limit( $self, $key=undef, @args ) {
     my $token = undef;
     my $res = $self->future;
-    push @{ $self->queue }, [ $res, $token ];
+    push @{ $self->queue }, [ $res, $token, \@args ];
     $self->schedule_queued;
     $res;
 }
