@@ -18,8 +18,8 @@ GetOptions(
 $host_connection_limit ||= 9999;
 $connection_limit ||= 9999;
 
-my $per_host = Future::RateLimiter( max => $host_connection_limit );
-my $total    = Future::RateLimiter( max => $connection_limit );
+my $per_host = Future::Limiter( maximum => $host_connection_limit, );
+my $total    = Future::Limiter( maximum => $connection_limit );
 
 my $request_rate = 600 / 60; # Limit to 10 requests per second
 
