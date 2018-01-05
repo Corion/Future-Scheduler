@@ -40,7 +40,7 @@ my (@jobs, @done);
 my $start = time;
 for my $i (1..10) {
     push @jobs, Future->done($i)->then(sub($id) {
-        $limit{request}->limit($i)
+        $limit{request}->limit(undef, $i)
     })->then(sub($token,$id,@r) {
         work(4, $id);
     })->then(sub($id,@r) {
