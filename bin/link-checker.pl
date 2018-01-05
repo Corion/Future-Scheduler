@@ -49,7 +49,10 @@ while( my $url = shift @queue or keys %outstanding) {
         })->then(sub( $body, $headers ) {
             delete $outstanding{ $url };
             $status{ $url } = $headers->{Status};
+
+            # This would be the ->then() of a per-request future
             push @queue, grep { !$requested{$_}++ } get_links( $body );
+
         })->on_ready(sub {
             # Clean up our tokens
             @tokens = ();
