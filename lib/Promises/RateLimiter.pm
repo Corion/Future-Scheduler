@@ -81,7 +81,7 @@ requests are made to the server.
 
 =cut
 
-with Role::RateLimiter;
+with 'Role::RateLimiter';
 
 sub retry {
     my($self,$p,$args) = @_;
