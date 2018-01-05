@@ -38,7 +38,7 @@ ok exists $limit{request}, "We have a limiter named 'request'";
 
 sub work($time, $id) {
     sleep( $time )->on_ready(sub {
-        warn "Timer expired";
+        #warn "Timer expired";
     })->catch(sub{warn "Uhoh @_"})->then(sub{ future()->done($id)});
 }
 
@@ -46,7 +46,7 @@ my (@jobs, @done);
 my $start = time;
 for my $i (1..10) {
     push @jobs, Future->done($i)->then(sub($id) {
-        $limit{request}->limit(undef, $i)
+        $limit{'request'}->limit(undef, $i)
     })->then(sub($token,$id,@r) {
         work(4, $id);
     })->then(sub($id,@r) {
