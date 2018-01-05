@@ -64,7 +64,7 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
 
 =cut
 
-sub limit( $self, $key = [], @args ) {
+sub limit( $self, $key = undef, @args ) {
     $self->_bucket( $key )->limit( @args )
 }
 
