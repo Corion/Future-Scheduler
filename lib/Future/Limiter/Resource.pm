@@ -8,6 +8,8 @@ use AnyEvent::Future; # later we'll go independent
 use Scalar::Util qw(weaken);
 use Guard 'guard';
 
+with 'Future::Limiter::Role'; # limit()
+
 has maximum => (
     is => 'rw',
     default => 4,
@@ -59,37 +61,6 @@ sub remove_active( $self ) {
     };
 }
 
-sub schedule( $self, $f, $args=[], $seconds = 0 ) {
-    # This is backend-specific and should put a timeout
-    # after 0 ms into the queue or however the IO loop schedules
-    # an immediate callback from the IO loop
-    my $n;
-    $n = $self->sleep($seconds)->then(sub { undef $n; $f->done( @$args ) });
-    $n
-}
-
-=head2 C<< ->sleep >>
-
-  $l->sleep( 10 )->then(sub {
-      ...
-  });
-
-  await $l->sleep( 10 );
-
-Returns a future that will execute in $after seconds
-
-=cut
-
-sub sleep( $self, $seconds = 0 ) {
-    # At least until we have the backends that implement sleeping
-    AnyEvent::Future->new_delay( after => $seconds );
-}
-
-sub future( $self ) {
-    # At least until we have the backends that implement sleeping
-    AnyEvent::Future->new;
-}
-
 =head2 C<< $bucket->enqueue( $cb, $args ) >>
 
   my $f = $bucket->enqueue(sub {
@@ -103,20 +74,12 @@ future holds.
 
 =cut
 
-sub limit( $self, $key=undef, @args ) {
-    my $token = undef;
-    my $res = $self->future;
-    push @{ $self->queue }, [ $res, $token, \@args ];
-    $self->schedule_queued;
-    $res;
-}
-
 =head2 C<< $bucket->schedule_queued >>
 
   $bucket->schedule_queued
 
 Processes all futures that can be started while obeying the current rate limits.
-  
+
 =cut
 
 sub schedule_queued( $self ) {

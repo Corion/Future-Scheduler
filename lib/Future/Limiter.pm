@@ -6,6 +6,7 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 
 use Future::Limiter::Resource;
+use Future::Limiter::Rate;
 
 # Container for the defaults
 
@@ -65,7 +66,7 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
 =cut
 
 sub limit( $self, $key = undef, @args ) {
-    $self->_bucket( $key )->limit( @args )
+    return $self->_bucket( $key )->limit( @args );
 }
 
 1;
