@@ -4,6 +4,7 @@ use Moo 2;
 use Filter::signatures;
 use feature 'signatures';
 no warnings 'experimental::signatures';
+use Carp qw(croak);
 
 use Future::Limiter::Resource;
 use Future::Limiter::Rate;
@@ -46,6 +47,9 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
         $bucket_class ||= 'Future::Limiter::Resource';
     } elsif( $args{ rate }) {
         $bucket_class ||= 'Future::Limiter::Rate';
+    } else {
+        require Data::Dumper;
+        croak "Don't know what to do with " . Data::Dumper::Dumper \%args;
     }
     $class->$orig( bucket_class => $bucket_class, bucket_args => \%args )
 };
@@ -67,6 +71,6 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
 
 sub limit( $self, $key = undef, @args ) {
     return $self->_bucket( $key )->limit( @args );
-}
 
+}
 1;
