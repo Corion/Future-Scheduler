@@ -7,9 +7,10 @@ use Test::More tests => 8;
 use AnyEvent::Future;
 
 use YAML qw(LoadFile);
+use Future::Limiter;
+use Future::Scheduler::Functions 'sleep', 'future';
 
 use Data::Dumper;
-my $spec = LoadFile 't/ratelimits.yml';
 
 sub generate_limiters( $blob ) {
     my %limiters = map {
@@ -19,7 +20,12 @@ sub generate_limiters( $blob ) {
     %limiters
 }
 
-my %limit = generate_limiters( $spec );
+sub from_file( $filename ) {
+    my $spec = LoadFile $filename;
+    generate_limiters( $spec )
+}
+
+my %limit = from_file( 't/ratelimits.yml' );
 
 ok exists $limit{namelookup}, "We have a limiter named 'namelookup'";
 ok exists $limit{request}, "We have a limiter named 'request'";
@@ -31,9 +37,9 @@ ok exists $limit{request}, "We have a limiter named 'request'";
 # 3@4 , 1@5  3@8, 1@9
 
 sub work($time, $id) {
-    AnyEvent::Future->new_delay(after => $time)->on_ready(sub {
-        #warn "Timer expired";
-    })->catch(sub{warn "Uhoh @_"})->then(sub{ Future->done($id)});
+    sleep( $time )->on_ready(sub {
+        warn "Timer expired";
+    })->catch(sub{warn "Uhoh @_"})->then(sub{ future()->done($id)});
 }
 
 my (@jobs, @done);
@@ -47,7 +53,7 @@ for my $i (1..10) {
         push @done, [time-$start,$id];
         Future->done
     })->catch(sub{
-    warn "@_ / $! / $_";
+        warn "@_ / $! / $_";
     });
 }
 # Wait for the jobs
@@ -68,18 +74,18 @@ no warnings 'experimental::signatures';
 use feature 'signatures';
 use Carp qw( croak );
 use Future::RateLimiter;
-use Future::Limiter::Resource;
+use Future::Limiter;
 
 sub new( $class, $limits ) {
     my @chain;
     for my $l (@$limits) {
         if( exists $l->{maximum}) {
-            push @chain, Future::Limiter::Resource->new( %$l );
+            push @chain, Future::Limiter->new( %$l );
         } elsif( exists $l->{burst} ) {
             $l->{ rate } =~ m!(\d+)\s*/\s*(\d+)!
                 or croak "Invalid rate limit: $l->{rate}";
             $l->{rate} = $1 / $2;
-            push @chain, Future::RateLimiter->new( rate => $l->{rate}, burst => $l->{burst}, );
+            push @chain, Future::Limiter->new( rate => $l->{rate}, burst => $l->{burst}, );
         } else {
             require Data::Dumper;
             croak "Don't know what to do with " . Data::Dumper::Dumper $limits;
