@@ -27,7 +27,7 @@ our $implementation;
 our $VERSION = '0.01';
 
 our @loops = (
-    ['IO/Async/Loop.pm' => 'Future::Scheduler::IOAsync' ],
+    ['IO/Async.pm'      => 'Future::Scheduler::IOAsync' ],
     ['Mojo/IOLoop.pm'   => 'Future::Scheduler::Mojo' ],
     ['AnyEvent.pm'      => 'Future::Scheduler::AnyEvent'],
     ['AE.pm'            => 'Future::Scheduler::AnyEvent'],
