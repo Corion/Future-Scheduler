@@ -31,6 +31,15 @@ Future::Limiter - impose rate and resource limits
 This module provides an API to handle rate limits and resource limits in a
 unified API.
 
+=head2 Usage with Future::AsyncAwait
+
+The usage with L<Future::AsyncAwait> is much more elegant, as you only need
+to keep the token around and other parameters live implicitly in your scope:
+
+  my( $token ) = await $limiter->limit( $hostname );
+  request_url( $url )
+  ...
+
 =cut
 
 # Container for the defaults
