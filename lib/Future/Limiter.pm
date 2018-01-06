@@ -6,6 +6,8 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 use Carp qw(croak);
 
+with 'Future::Limiter::Role';
+
 use Future::Limiter::Resource;
 use Future::Limiter::Rate;
 
@@ -60,6 +62,7 @@ has 'buckets' => (
 
 sub _make_bucket( $self, %options ) {
     %options = (%{ $self->bucket_args() }, %options);
+    $options{ scheduler } ||= $self->scheduler;
     $self->bucket_class->new( \%options );
 }
 
@@ -111,6 +114,6 @@ again. Additional parameters are passed through as well.
 
 sub limit( $self, $key = undef, @args ) {
     return $self->_bucket( $key )->limit( @args );
-
 }
+
 1;
