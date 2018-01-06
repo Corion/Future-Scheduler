@@ -37,12 +37,13 @@ WriteMakefile1(
 
     PL_FILES            => {},
     'PREREQ_PM' => {
-        'Moo' => 0,
+        'Moo' => 2, # fatal warnings are just stupid
         'Promises' => 0,
+        'Future'   => 0,
         'Algorithm::TokenBucket' => 0,
         'AnyEvent::Future' => 0, # for the timer...
         'Guard' => 0,
-        'Scalar::Util' => 0,
+        'Scalar::Util' => 0, # for weaken
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Promises-RateLimiter-*' },
