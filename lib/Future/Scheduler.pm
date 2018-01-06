@@ -81,14 +81,25 @@ sub best_implementation( $class, @candidates ) {
 
 =head2 C<< $scheduler->sleep($seconds) >>
 
-    ...
+    my $wakeup = $scheduler->sleep( 5 );
+    $wakeup->then(sub {
+        print "It's now 5 seconds later\n";
+    });
+
+Returns a future that will be fulfilled after C<$seconds> seconds. Depending on
+the backend features, subsecond resoultion might be available.
 
 =head2 C<< $scheduler->schedule() >>
 
-    ...
+    $scheduler->schedule()->then(sub {
+    });
 
 Schedules a Future to be executed from the top level mainloop. This is usually
-equivalent to C<< ->sleep(0) >>.
+equivalent to C<< ->sleep(0) >>. This is convenient if you want to prevent the
+call stack getting too deep, but makes it much harder to find where a Future
+originated, due to losing the callstack.
+
+See also L<Future/Tracing Methods> for how to give your Futures names.
 
 =head1 VARIABLES
 
