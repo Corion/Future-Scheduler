@@ -9,6 +9,30 @@ use Carp qw(croak);
 use Future::Limiter::Resource;
 use Future::Limiter::Rate;
 
+=head1 NAME
+
+Future::Limiter - impose rate and resource limits
+
+=head1 SYNOPSIS
+
+  # rate of 30 per minute
+  my $limiter = Future::Limiter->new(
+      rate  => 0.5,
+      burst => 2,
+  );
+
+  $limiter->limit( $hostname, $url )->then(sub {
+      my( $token, $url ) = @_;
+      request_url( $url )
+  })->then(sub {
+      ...
+  });
+
+This module provides an API to handle rate limits and resource limits in a
+unified API.
+
+=cut
+
 # Container for the defaults
 
 has bucket_class => (
@@ -43,9 +67,9 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
         %args = @args
     };
     my $bucket_class = delete $args{ bucket_class };
-    if( $args{ maximum }) {
+    if( exists $args{ maximum }) {
         $bucket_class ||= 'Future::Limiter::Resource';
-    } elsif( $args{ rate }) {
+    } elsif( exists $args{ rate } or exists $args{ burst }) {
         $bucket_class ||= 'Future::Limiter::Rate';
     } else {
         require Data::Dumper;
@@ -54,7 +78,7 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
     $class->$orig( bucket_class => $bucket_class, bucket_args => \%args )
 };
 
-=head2 C<< $l->limit( $key ) >>
+=head2 C<< $l->limit( $key, @args ) >>
 
   my $token;
   $l->limit( $key )->then( sub {
@@ -66,6 +90,13 @@ around 'BUILDARGS' => sub ( $orig, $class, @args ) {
       # release the token to release our limiting
       undef $token
   })
+
+This method returns a L<Future> that will become fulfilled if the current
+limit is not reached. The C<$key> parameter restricts that resource to a
+specific key (like, a hostname).
+
+The future returns a token that must be released for the resource to be freed
+again. Additional parameters are passed through as well.
 
 =cut
 
