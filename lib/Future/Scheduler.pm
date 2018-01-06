@@ -27,9 +27,10 @@ our $implementation;
 our $VERSION = '0.01';
 
 our @loops = (
-    ['Mojo/IOLoop.pm' => 'Future::Scheduler::Mojo' ],
-    ['AnyEvent.pm'    => 'Future::Scheduler::AnyEvent'],
-    ['AE.pm'          => 'Future::Scheduler::AnyEvent'],
+    ['IO/Async/Loop.pm' => 'Future::Scheduler::IOAsync' ],
+    ['Mojo/IOLoop.pm'   => 'Future::Scheduler::Mojo' ],
+    ['AnyEvent.pm'      => 'Future::Scheduler::AnyEvent'],
+    ['AE.pm'            => 'Future::Scheduler::AnyEvent'],
     # IO::Async support would be nice
     
     # The fallback, will always catch due to loading Future itself
