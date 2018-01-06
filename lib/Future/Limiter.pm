@@ -17,17 +17,29 @@ Future::Limiter - impose rate and resource limits
 
 =head1 SYNOPSIS
 
+  # max 4 requests (per host)
+  my $concurrency = Future::Limiter->new(
+      maximum => 4
+  );
+
   # rate of 30 per minute
-  my $limiter = Future::Limiter->new(
+  my $rate = Future::Limiter->new(
       rate  => 0.5,
       burst => 2,
   );
 
-  $limiter->limit( $hostname, $url )->then(sub {
-      my( $token, $url ) = @_;
+  my ($host_token, $rate_token);
+  $concurrency->limit( $hostname, $url )->then(sub {
+      ($host_token, my $url ) = @_;
+  })->then( sub {
+      $rate->limit( $hostname, $url )
+  })->then( sub {
+      ( $rate_token, my $url ) = @_;
       request_url( $url )
   })->then(sub {
       ...
+      undef $host_token;
+      undef $rate_token;
   });
 
 This module provides an API to handle rate limits and resource limits in a
@@ -38,7 +50,8 @@ unified API.
 The usage with L<Future::AsyncAwait> is much more elegant, as you only need
 to keep the token around and other parameters live implicitly in your scope:
 
-  my( $token ) = await $limiter->limit( $hostname );
+  my( $host_token ) = await $concurrency->limit( $hostname );
+  my( $rate_token ) = await $rate->limit( $hostname );
   request_url( $url )
   ...
 
