@@ -34,7 +34,7 @@ our @loops = (
     # IO::Async support would be nice
     
     # The fallback, will always catch due to loading Future itself
-    ['Future.pm' => 'Future::Scheduler::Future'],
+    ['Future.pm'        => 'Future::Scheduler::Future'],
 );
 
 =head1 METHODS
