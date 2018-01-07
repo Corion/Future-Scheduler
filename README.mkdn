@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/Corion/Future-Scheduler.svg?branch=master)](https://github.com/Corion/Future-Scheduler)
+
 # NAME
 
 Future::Scheduler - provide helper functions for Future
