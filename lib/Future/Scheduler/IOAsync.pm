@@ -7,6 +7,8 @@ use feature 'signatures';
 use IO::Async::Loop;
 use IO::Async::Future;
 
+our $VERSION = '0.01';
+
 has loop => (
     is => 'lazy',
     default => sub { IO::Async::Loop->new },

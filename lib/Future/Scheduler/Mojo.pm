@@ -6,6 +6,8 @@ no warnings 'experimental::signatures';
 use feature 'signatures';
 use Future::Mojo;
 
+our $VERSION = '0.01';
+
 sub future( $self ) {
     Future::Mojo->new
 }

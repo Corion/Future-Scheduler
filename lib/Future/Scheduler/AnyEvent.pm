@@ -6,6 +6,8 @@ no warnings 'experimental::signatures';
 use feature 'signatures';
 use AnyEvent::Future;
 
+our $VERSION = '0.01';
+
 sub sleep( $self, $seconds = 0 ) {
     # At least until we have the backends that implement sleeping
     AnyEvent::Future->new_delay( after => $seconds );
