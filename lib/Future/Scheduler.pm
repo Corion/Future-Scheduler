@@ -14,7 +14,7 @@ Future::Scheduler - provide helper functions for Future
     my $wakeup = $sched->sleep(5);
     $wakeup->then(...)->get;
 
-This module is a wrapper around the various backend of Future providing
+This module is a wrapper around the various backends of Future providing
 a common API for the simple scheduling mechanisms available from the IO loops.
 
 =head2 Supported event loops
