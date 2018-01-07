@@ -1,4 +1,5 @@
 .gitignore
+Changes
 lib/Future/Scheduler.pm
 lib/Future/Scheduler/AnyEvent.pm
 lib/Future/Scheduler/Functions.pm
