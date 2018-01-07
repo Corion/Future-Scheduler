@@ -45,9 +45,10 @@ my %module = (
     },
 
     'PREREQ_PM' => {
-        'Moo'          => 2, # fatal warnings are just stupid
-        'Future'       => 0,
-        'Scalar::Util' => 0, # for weaken
+        'Filter::signatures' => 0,
+        'Moo'                => 2, # fatal warnings are just stupid
+        'Future'             => 0,
+        'Scalar::Util'       => 0, # for weaken
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Future-Scheduler-*' },
