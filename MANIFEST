@@ -1,4 +1,3 @@
-.gitignore
 Changes
 lib/Future/Scheduler.pm
 lib/Future/Scheduler/AnyEvent.pm
@@ -9,6 +8,8 @@ lib/Future/Scheduler/Mojo.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
+META.yml
 README
 README.mkdn
 t/future-scheduler-anyevent.t
