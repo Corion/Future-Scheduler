@@ -79,16 +79,19 @@ sub best_implementation( $class, @candidates ) {
     };
 
     # Check which one we can load:
+    my @errors;
     for my $impl (@applicable_implementations) {
         if( eval "require $impl; 1" ) {
             return $impl;
-        };
+        } else {
+            push @errors, [$impl, "$@"];
+        }
     };
 
     # If we get here, we didn't find a suitable implementation
     require Data::Dumper;
     warn Data::Dumper::Dumper( \%INC );
-    die "No working/loadable implementation found in " . Data::Dumper::Dumper(\@applicable_implementations);
+    die "No working/loadable implementation found:\n" . Data::Dumper::Dumper(\@errors);
 };
 
 =head2 C<< $scheduler->sleep($seconds) >>
