@@ -15,6 +15,8 @@ Future::Scheduler - provide helper functions for Future
     my $wakeup = $sched->sleep(5);
     $wakeup->then(...)->get;
 
+    my $waitable = $sched->future;
+
 This module is a wrapper around the various backends of Future providing
 a common API for the simple scheduling mechanisms available from the IO loops.
 
@@ -115,6 +117,12 @@ call stack getting too deep, but makes it much harder to find where a Future
 originated, due to losing the callstack.
 
 See also L<Tracing Methods in Future|Future/TRACING> for how to give your Futures names.
+
+=head2 C<< $scheduler->future() >>
+
+    my $waitable = $scheduler->future;
+
+Returns a future that is compatible with the current event loop.
 
 =head1 VARIABLES
 
