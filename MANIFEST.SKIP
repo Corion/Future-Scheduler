@@ -15,4 +15,4 @@ Makefile$
 ^cpan/
 ^MYMETA
 ^.releaserc
-^Promises-RateLimiter
+^Future-Scheduler
