@@ -99,7 +99,7 @@ equivalent to C<< ->sleep(0) >>. This is convenient if you want to prevent the
 call stack getting too deep, but makes it much harder to find where a Future
 originated, due to losing the callstack.
 
-See also L<Future/Tracing Methods> for how to give your Futures names.
+See also L<Tracing Methods in Future|Future/TRACING> for how to give your Futures names.
 
 =head1 VARIABLES
 
