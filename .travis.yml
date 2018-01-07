@@ -25,7 +25,7 @@ matrix:
 
 sudo: false
 
-before:install:
+before_install:
   - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
   - source ~/travis-perl-helpers/init
   - build-perl
