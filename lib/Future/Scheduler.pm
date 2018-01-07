@@ -130,7 +130,7 @@ L<Future>
 =head1 REPOSITORY
 
 The public repository of this module is
-L<http://github.com/Corion/...>.
+L<http://github.com/Corion/Future-Scheduler>.
 
 =head1 SUPPORT
 
@@ -140,8 +140,8 @@ L<https://perlmonks.org/>.
 =head1 BUG TRACKER
 
 Please report bugs in this module via the RT CPAN bug queue at
-L<https://rt.cpan.org/Public/Dist/Display.html?Name=...>
-or via mail to L<future-http-Bugs@rt.cpan.org>.
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=Future-Scheduler>
+or via mail to L<future-scheduler-Bugs@rt.cpan.org>.
 
 =head1 AUTHOR
 
