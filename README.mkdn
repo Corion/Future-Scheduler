@@ -8,7 +8,7 @@ Future::Scheduler - provide helper functions for Future
     my $wakeup = $sched->sleep(5);
     $wakeup->then(...)->get;
 
-This module is a wrapper around the various backend of Future providing
+This module is a wrapper around the various backends of Future providing
 a common API for the simple scheduling mechanisms available from the IO loops.
 
 ## Supported event loops
@@ -76,7 +76,7 @@ letting the module autodetect it, you can set it yourself.
 # REPOSITORY
 
 The public repository of this module is
-[http://github.com/Corion/...](http://github.com/Corion/...).
+[http://github.com/Corion/Future-Scheduler](http://github.com/Corion/Future-Scheduler).
 
 # SUPPORT
 
@@ -86,8 +86,8 @@ The public support forum of this module is
 # BUG TRACKER
 
 Please report bugs in this module via the RT CPAN bug queue at
-[https://rt.cpan.org/Public/Dist/Display.html?Name=...](https://rt.cpan.org/Public/Dist/Display.html?Name=...)
-or via mail to [future-http-Bugs@rt.cpan.org](https://metacpan.org/pod/future-http-Bugs@rt.cpan.org).
+[https://rt.cpan.org/Public/Dist/Display.html?Name=Future-Scheduler](https://rt.cpan.org/Public/Dist/Display.html?Name=Future-Scheduler)
+or via mail to [future-scheduler-Bugs@rt.cpan.org](https://metacpan.org/pod/future-scheduler-Bugs@rt.cpan.org).
 
 # AUTHOR
 
