@@ -1,94 +1,102 @@
 # NAME
 
-Promises::RateLimiter - rate limit paths through promises
+Future::Scheduler - provide helper functions for Future
 
 # SYNOPSIS
 
-This is the synopsis of [Promises](https://metacpan.org/pod/Promises), but with added limiting
-of the number of simulatneous HTTP requests and the rate at which
-requests are made to the server.
+    my $sched = Future::Scheduler->new();
+    my $wakeup = $sched->sleep(5);
+    $wakeup->then(...)->get;
 
-    use AnyEvent::HTTP;
-    use JSON::XS qw[ decode_json ];
-    use Promises qw[ collect deferred ];
-    use Promises::RateLimiter;
+This module is a wrapper around the various backend of Future providing
+a common API for the simple scheduling mechanisms available from the IO loops.
 
-    my $concurrent_http_requests = Promises::RateLimiter->new(
-        maximum => 4,
-        rate => 30/60, # 30 requests/minute
-    );
+## Supported event loops
 
-    sub fetch_it {
-          my ($uri) = @_;
-          my $d = deferred;
-          http_get $uri => sub {
-              my ($body, $headers) = @_;
-              $headers->{Status} == 200
-                  ? $d->resolve( $uri, $body )
-                  : $d->reject( $body )
-          };
-          $d->promise;
-    }
+Currently only [AnyEvent](https://metacpan.org/pod/AnyEvent), [Mojolicious](https://metacpan.org/pod/Mojolicious) and [IO::Async](https://metacpan.org/pod/IO::Async) are supported
+in addition to a trivial, blocking default backend if none of the above event
+loops can be detected.
 
+# METHODS
 
-    my @urls = (@ARGV);
-    while(@urls) {
+## `Future::Scheduler->new()`
 
-      my $cv = AnyEvent->condvar;
-      
-      my @limited_urls = map {
-          map {
-              # Wrap each URL in a Promise
-              my $p = deferred;
-              $p->resolve( $uri );
-              $p->promise
-              ->limit( $concurrent_http_requests )
-          }
-      } splice @urls;
+    my $ua = Future::Scheduler->new();
 
-      my @fetch = map {
-          $_->limit( $concurrent_http_requests )
-          ->then( sub { 
-              my( $url ) = @_;
-              fetch_it($_)
-          })
-          ->then( sub {
-              my($url, $html) = @_;
-              
-              my @newly_found = extract_urls($html);
-              
-              push @urls, @newly_found;
-              
-              return $url, $html;
-          })
-      } @now_fetching;
+Creates a new instance of the scheduler abstraction.
 
-      # Wait until all requests have either died or returned.
-      my $done = collect( @fetch );
-      
-      my @retrieved = await( $done );
-      ...
-    }
+## `$scheduler->sleep($seconds)`
 
-# DRAWBACKS
+    my $wakeup = $scheduler->sleep( 5 );
+    $wakeup->then(sub {
+        print "It's now 5 seconds later\n";
+    });
 
-Currently, the limiter sends the promise to sleep until at least one
-promise can continue. This produces a thundering herd effect as all
-outstanding promises will wake up and retry at the same time but only
-one will likely succeed. See
-[Promises::RateLimiter::Backoff](https://metacpan.org/pod/Promises::RateLimiter::Backoff) for a way to mitigate that.
+Returns a future that will be fulfilled after `$seconds` seconds. Depending on
+the backend features, subsecond resoultion might be available.
 
-Maybe Promises::RateLimiter::Backoff should become the default
-strategy to prevent thundering herds.
+## `$scheduler->schedule()`
 
-# NAME
+    $scheduler->schedule()->then(sub {
+    });
 
-Promises::RateLimiter::Backoff - rate limit with larger retry spread
+Schedules a Future to be executed from the top level mainloop. This is usually
+equivalent to `->sleep(0)`. This is convenient if you want to prevent the
+call stack getting too deep, but makes it much harder to find where a Future
+originated, due to losing the callstack.
 
-# Strategy
+See also ["Tracing Methods" in Future](https://metacpan.org/pod/Future#Tracing-Methods) for how to give your Futures names.
 
-This limiter counts how many attempts were already limited and schedules
-the current promise to retry linearly after all previous promises will
-have retried.
+# VARIABLES
 
-No exponential backoff is tried.
+## `@Future::Scheduler::loops`
+
+This is the list of adapter implementations for the various backends. If you
+have another backend that is not yet supported by [Future::Scheduler](https://metacpan.org/pod/Future::Scheduler), you
+can `unshift` it to the list yourself as a workaround.
+
+The array holds the pairs of
+
+    [ "loaded/module.pm" => 'Backend::Implementation::Class' ],
+
+## `$Future::Scheduler::implementation`
+
+Holds the base class that provides the current implementation. This is
+initialized through
+
+    $Future::Scheduler::implementation = Future::Scheduler->best_implementation()
+
+If you really, really need to force a specific implementation rather than
+letting the module autodetect it, you can set it yourself.
+
+# SEE ALSO
+
+[Future](https://metacpan.org/pod/Future)
+
+# REPOSITORY
+
+The public repository of this module is
+[http://github.com/Corion/...](http://github.com/Corion/...).
+
+# SUPPORT
+
+The public support forum of this module is
+[https://perlmonks.org/](https://perlmonks.org/).
+
+# BUG TRACKER
+
+Please report bugs in this module via the RT CPAN bug queue at
+[https://rt.cpan.org/Public/Dist/Display.html?Name=...](https://rt.cpan.org/Public/Dist/Display.html?Name=...)
+or via mail to [future-http-Bugs@rt.cpan.org](https://metacpan.org/pod/future-http-Bugs@rt.cpan.org).
+
+# AUTHOR
+
+Max Maischein `corion@cpan.org`
+
+# COPYRIGHT (c)
+
+Copyright 2018 by Max Maischein `corion@cpan.org`.
+
+# LICENSE
+
+This module is released under the same terms as Perl itself.

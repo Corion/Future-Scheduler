@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker qw(WriteMakefile);
 my $eumm_version = $ExtUtils::MakeMaker::VERSION;
 $eumm_version =~ s/_//;
 
-my $module = 'Promises::RateLimiter';
+my $module = 'Future::Scheduler';
 (my $main_file = "lib/$module.pm" ) =~ s!::!/!g;
 
 # I should maybe use something like Shipwright...
@@ -19,37 +19,54 @@ regen_README($main_file);
 
 my @tests = map { glob $_ } 't/*.t', 't/*/*.t';
 
-WriteMakefile1(
+my %module = (
     NAME                => $module,
     AUTHOR              => q{Max Maischein <corion@cpan.org>},
     VERSION_FROM        => $main_file,
     ABSTRACT_FROM       => $main_file,
     META_MERGE => {
+        "meta-spec" => { version => 2 },
         resources => {
-            repository => 'https://github.com/Corion/promises-ratelimiter',
+            repository => {
+                web => 'https://github.com/Corion/Future-Scheduler',
+                url => 'git://github.com/Corion/Future-Scheduler.git',
+                type => 'git',
+            }
         },
-    },
-    BUILD_REQUIRES => {
-        'Exporter'   => '5',    # we need the "import" facility
+        dynamic_config   => 0, # we promise to keep META.* up-to-date
+        x_static_install => 1, # we are pure Perl and don't do anything fancy
     },
 
     'LICENSE'=> 'perl',
 
     PL_FILES            => {},
+    BUILD_REQUIRES => {
+        'ExtUtils::MakeMaker' => 0,
+    },
+
     'PREREQ_PM' => {
-        'Moo' => 2, # fatal warnings are just stupid
-        'Promises' => 0,
-        'Future'   => 0,
-        'Algorithm::TokenBucket' => 0,
-        'AnyEvent::Future' => 0, # for the timer...
-        'Guard' => 0,
+        'Moo'          => 2, # fatal warnings are just stupid
+        'Future'       => 0,
         'Scalar::Util' => 0, # for weaken
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'Promises-RateLimiter-*' },
+    clean               => { FILES => 'Future-Scheduler-*' },
 
     test            => { TESTS => join( ' ', @tests ) },
 );
+
+# This is so that we can do
+#     require 'Makefile.PL'
+# and then call get_module_info
+
+sub get_module_info { %module }
+
+if( ! caller ) {
+    # I should maybe use something like Shipwright...
+    regen_README($main_file);
+    #regen_EXAMPLES();
+    WriteMakefile1(get_module_info);
+};
 
 1;
 

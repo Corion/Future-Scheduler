@@ -16,7 +16,7 @@ BEGIN {
 		plan skip_all => "$@";
 		exit 0;
 	} else {
-		plan tests => 1;
+		plan tests => 2;
 	};
 };
 

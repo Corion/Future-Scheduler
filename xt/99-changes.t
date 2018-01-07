@@ -12,7 +12,7 @@ release date is mentioned as well
 
 =cut
 
-my $module = 'Promises::RateLimiter';
+my $module = 'Future::Scheduler';
 
 (my $file = $module) =~ s!::!/!g;
 require "$file.pm";
