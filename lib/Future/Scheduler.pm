@@ -72,12 +72,20 @@ sub best_implementation( $class, @candidates ) {
         $INC{$_->[0]}
     } @candidates;
 
+    if( ! @applicable_implementations ) {
+        require Data::Dumper;
+        warn Data::Dumper::Dumper( \%INC );
+        die "No suitable implementation found in " . Data::Dumper::Dumper(\@candidates);
+    };
+
     # Check which one we can load:
     for my $impl (@applicable_implementations) {
         if( eval "require $impl; 1" ) {
             return $impl;
         };
     };
+
+    # If we get here, we didn't find a suitable implementation
 };
 
 =head2 C<< $scheduler->sleep($seconds) >>
