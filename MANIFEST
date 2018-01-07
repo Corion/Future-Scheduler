@@ -16,9 +16,7 @@ t/future-scheduler-anyevent.t
 t/future-scheduler-future.t
 t/future-scheduler-ioasync.t
 t/future-scheduler-mojo.t
-talk-rate-limiting.pod
 xt/99-changes.t
-xt/99-compile.t
 xt/99-manifest.t
 xt/99-pod.t
 xt/99-todo.t
