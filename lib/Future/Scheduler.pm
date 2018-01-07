@@ -86,6 +86,9 @@ sub best_implementation( $class, @candidates ) {
     };
 
     # If we get here, we didn't find a suitable implementation
+    require Data::Dumper;
+    warn Data::Dumper::Dumper( \%INC );
+    die "No working/loadable implementation found in " . Data::Dumper::Dumper(\@applicable_implementations);
 };
 
 =head2 C<< $scheduler->sleep($seconds) >>
