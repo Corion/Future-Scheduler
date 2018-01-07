@@ -4,8 +4,6 @@ use Moo 2;
 use Filter::signatures;
 no warnings 'experimental::signatures';
 use feature 'signatures';
-use IO::Async::Loop;
-use IO::Async::Future;
 
 our $VERSION = '0.01';
 
